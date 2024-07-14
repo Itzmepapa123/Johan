@@ -23,15 +23,15 @@ API_HASH = os.environ.get("API_HASH", "6d48cb362a97a43cfc944fd5c0f917f9")
 CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002225858852"))
 
 #OWNER ID
-OWNER_ID = int(os.environ.get("OWNER_ID", "5082638362"))
+OWNER_ID = int(os.environ.get("OWNER_ID", "6572039181"))
 
 #Port
 PORT = os.environ.get("PORT", "8080")
 
 #Database
-DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://Mehtadmphta33:Mehtab1234@cluster0.2kwcnnv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://itzmeproman:itzmeproman@cluster0.4v4f5ao.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 JOIN_REQS_DB = environ.get("JOIN_REQS_DB", DB_URI)
-DB_NAME = os.environ.get("DATABASE_NAME", "fair")
+DB_NAME = os.environ.get("DATABASE_NAME", "itzmeproman")
 
 #force sub channel id, if you want enable force sub
 FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "-1002042157570"))
@@ -40,7 +40,7 @@ FORCE_SUB_CHANNEL2 = int(os.environ.get("FORCE_SUB_CHANNEL2", "-1002045619985"))
 TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "4"))
 
 #start message
-START_MSG = os.environ.get("START_MESSAGE", "<b>Hello {first}\n\nI am a file store bot Powered by @Animes_Fair ⚡</b>.")
+START_MSG = os.environ.get("START_MESSAGE", "<b>Hello {first}\n\nI am a file store bot Powered by @Anime_4us ⚡</b>.")
 try:
     ADMINS=[5082638362]
     for x in (os.environ.get("ADMINS", "5082638362").split()):

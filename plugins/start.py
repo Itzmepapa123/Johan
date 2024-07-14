@@ -9,7 +9,9 @@ from pyrogram import Client, filters, __version__
 from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserNotParticipant
+import pyrogram.utils
 
+pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
 from bot import Bot
 from config import ADMINS, OWNER_ID, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT
 from helper_func import subscribed1, subscribed2, encode, decode, get_messages

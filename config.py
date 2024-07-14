@@ -20,7 +20,7 @@ APP_ID = int(os.environ.get("APP_ID", "19863702"))
 API_HASH = os.environ.get("API_HASH", "6d48cb362a97a43cfc944fd5c0f917f9")
 
 #Your db channel Id
-CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002109743886"))
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002225858852"))
 
 #OWNER ID
 OWNER_ID = int(os.environ.get("OWNER_ID", "5082638362"))
@@ -34,8 +34,8 @@ JOIN_REQS_DB = environ.get("JOIN_REQS_DB", DB_URI)
 DB_NAME = os.environ.get("DATABASE_NAME", "fair")
 
 #force sub channel id, if you want enable force sub
-FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "-1001504477702"))
-FORCE_SUB_CHANNEL2 = int(os.environ.get("FORCE_SUB_CHANNEL2", "-1002106622537"))
+FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "-1002042157570"))
+FORCE_SUB_CHANNEL2 = int(os.environ.get("FORCE_SUB_CHANNEL2", "-1002045619985"))
 
 TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "4"))
 

@@ -15,7 +15,7 @@ from config import ADMINS, OWNER_ID, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISAB
 from helper_func import subscribed1, subscribed2, encode, decode, get_messages
 from database.database import add_user, del_user, full_userbase, present_user
 async def delete_after_delay(message: Message, delay):
-    await asyncio.sleep(1800)
+    await asyncio.sleep(600)
     await message.delete()
 
 @Bot.on_message(filters.command('start') & filters.private & subscribed1 & subscribed2)
@@ -80,14 +80,13 @@ async def start_command(client: Client, message: Message):
                     k = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     await asyncio.sleep(0.5)
                     if k is not None:
-                        asyncio.create_task(delete_after_delay(k, 1800))
+                        asyncio.create_task(delete_after_delay(k, 600))
             except FloodWait as e:
                 await asyncio.sleep(e.x)
                 await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
             except:
                 pass
-        await message.reply_text(f"<b><i>» Save These File In Your Saved Messages. It Will Be Deleted In 30 Minutes.\n» Must Join\n1. ⚡️⚡️@Anime_Fair⚡️⚡️\n2. ⚡️⚡️@Chat_Weeb⚡️⚡</i></b>")
-        await message.reply_text(f"<b>ＡＮＩＭＥ ＦＡＩＲ \n────────────────────────\nAnime Channel: @Anime_Fair\nHentai Channel: @Cultured_Fair\nManga Channel: @Manga_Fair\nMovie Channel: @Fair_Movies\n────────────────────────\nVisit @Chat_Weeb for more info..</b>")
+        await message.reply_text(f"<b><i>» Save These File In Your Saved Messages. It Will Be Deleted In 10 Minutes.\n» Must Join\n1. ⚡️⚡️@Anime_4us⚡️⚡️\n2. ⚡️⚡️@Chat_Weeb⚡️⚡</i></b>")
         
         return
     else:

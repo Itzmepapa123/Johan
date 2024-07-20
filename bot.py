@@ -67,14 +67,16 @@ class Bot(Client):
                 
 
             try:
-                db_channels = []
-                for channel_id in CHANNEL_IDS:
-                    db_channel = await self.get_chat(channel_id)
-                    db_channels.append(db_channel)
-                    test = await self.send_message(chat_id=db_channel.id, text="Test Message")
-                    await test.delete()
- 
-                self.db_channels = db_channels 
+                async def process_channels(self):
+                    try:
+                        db_channels = []
+                        for channel_id in CHANNEL_IDS:
+                        db_channel = await self.get_chat(channel_id)
+                        db_channels.append(db_channel)
+                        test = await self.send_message(chat_id=db_channel.id, text="Test Message")
+                        await test.delete()
+
+                self.db_channels = db_channels
                 
             except Exception as e:
                 self.LOGGER(__name__).warning(e)

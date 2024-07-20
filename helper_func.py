@@ -1,19 +1,15 @@
-#(©)AnimeXyz
-
 import base64
 import re
 import asyncio
-from pyrogram import filters
+from pyrogram import Client, filters
 from pyrogram.enums import ChatMemberStatus
-from config import FORCE_SUB_CHANNEL, FORCE_SUB_CHANNEL2, ADMINS
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from pyrogram.errors import FloodWait
-from config import JOIN_REQS_DB
+from config import FORCE_SUB_CHANNEL, FORCE_SUB_CHANNEL2, ADMINS, JOIN_REQS_DB
 from database.join_reqs import JoinReqs
 
 db = JoinReqs
-db_channel_ids = [-1002225858852, -1002210335718]
-
+db_channel_ids = [-1002225858852, -1002210335718]  # Replace with your actual private channel IDs
 
 async def is_subscribed1(filter, client, update):
     if not FORCE_SUB_CHANNEL:
@@ -22,14 +18,12 @@ async def is_subscribed1(filter, client, update):
     if user_id in ADMINS:
         return True
     try:
-        member = await client.get_chat_member(chat_id = FORCE_SUB_CHANNEL, user_id = user_id)
+        member = await client.get_chat_member(chat_id=FORCE_SUB_CHANNEL, user_id=user_id)
     except UserNotParticipant:
         return False
-
-    if not member.status in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
+    if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
         return False
-    else:
-        return True
+    return True
 
 async def is_subscribed2(filter, client, update):
     if not FORCE_SUB_CHANNEL2:
@@ -41,44 +35,39 @@ async def is_subscribed2(filter, client, update):
     if user and user["user_id"] == update.from_user.id:
         return True
     try:
-        member = await client.get_chat_member(chat_id = FORCE_SUB_CHANNEL2, user_id = user_id)
+        member = await client.get_chat_member(chat_id=FORCE_SUB_CHANNEL2, user_id=user_id)
     except UserNotParticipant:
         return False
-
-    if not member.status in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
+    if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
         return False
-    else:
-        return True
+    return True
 
-
-        
 async def encode(string):
     string_bytes = string.encode("ascii")
     base64_bytes = base64.urlsafe_b64encode(string_bytes)
-    base64_string = (base64_bytes.decode("ascii")).strip("=")
+    base64_string = base64_bytes.decode("ascii").strip("=")
     return base64_string
 
 async def decode(base64_string):
-    base64_string = base64_string.strip("=") # links generated before this commit will be having = sign, hence striping them to handle padding errors.
+    base64_string = base64_string.strip("=")
     base64_bytes = (base64_string + "=" * (-len(base64_string) % 4)).encode("ascii")
-    string_bytes = base64.urlsafe_b64decode(base64_bytes) 
-    string = string_bytes.decode("ascii")
-    return string
+    string_bytes = base64.urlsafe_b64decode(base64_bytes)
+    return string_bytes.decode("ascii")
 
-async def get_messages(client, message_ids):
+async def get_messages(client, db_channel_id, message_ids):
     messages = []
     total_messages = 0
     while total_messages != len(message_ids):
         temb_ids = message_ids[total_messages:total_messages+200]
         try:
             msgs = await client.get_messages(
-                chat_id=client.db_channel.id,
+                chat_id=db_channel_id,
                 message_ids=temb_ids
             )
         except FloodWait as e:
             await asyncio.sleep(e.x)
             msgs = await client.get_messages(
-                chat_id=client.db_channel.id,
+                chat_id=db_channel_id,
                 message_ids=temb_ids
             )
         except:
@@ -128,7 +117,24 @@ def get_readable_time(seconds: int) -> str:
     up_time += ":".join(time_list)
     return up_time
 
-
 subscribed1 = filters.create(is_subscribed1)
 subscribed2 = filters.create(is_subscribed2)
-       
+
+# Example handler function in your Pyrogram bot
+async def batch(client, message):
+    f_msg_id = await get_message_id(client, message, db_channel_ids)
+    print(f"Extracted message ID: {f_msg_id}")
+
+    if f_msg_id:
+        messages = await get_messages(client, db_channel_ids[0], [f_msg_id])
+        for msg in messages:
+            print(f"Message: {msg}")
+
+# Register the handler in your Pyrogram dispatcher
+app = Client("my_bot")
+
+@app.on_message(filters.text & subscribed1 & subscribed2)
+async def my_handler(client, message):
+    await batch(client, message)
+
+app.run()

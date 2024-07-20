@@ -68,7 +68,7 @@ class Bot(Client):
                 self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/Animetalks0 for support")
                 sys.exit()
         try:
-                self.db_channels = []
+            self.db_channels = []
             for channel_id in CHANNEL_IDS:
                 try:
                     db_channel = await self.get_chat(channel_id)

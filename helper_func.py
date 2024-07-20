@@ -58,43 +58,44 @@ async def get_messages(client, db_channel_id, message_ids):
     messages = []
     total_messages = 0
     while total_messages != len(message_ids):
-        temb_ids = message_ids[total_messages:total_messages+200]
+        temp_ids = message_ids[total_messages:total_messages+200]
         try:
             msgs = await client.get_messages(
                 chat_id=db_channel_id,
-                message_ids=temb_ids
+                message_ids=temp_ids
             )
         except FloodWait as e:
             await asyncio.sleep(e.x)
             msgs = await client.get_messages(
                 chat_id=db_channel_id,
-                message_ids=temb_ids
+                message_ids=temp_ids
             )
-        except:
-            pass
-        total_messages += len(temb_ids)
+        except Exception as e:
+            print(f"Error fetching messages: {e}")
+            break
+        total_messages += len(temp_ids)
         messages.extend(msgs)
     return messages
 
 async def get_message_id(client, message, db_channel_ids):
     if message.forward_from_chat:
         if message.forward_from_chat.id in db_channel_ids:
-            return message.forward_from_message_id
+            return message.forward_from_message_id, message.forward_from_chat.id
         else:
-            return 0
+            return 0, 0
     elif message.forward_sender_name:
-        return 0
+        return 0, 0
     elif message.text:
         pattern = r"https://t.me/c/(\d+)/(\d+)"
         matches = re.match(pattern, message.text)
         if not matches:
-            return 0
+            return 0, 0
         channel_id = matches.group(1)
         msg_id = int(matches.group(2))
         if channel_id.isdigit():
             if f"-100{channel_id}" in [str(id) for id in db_channel_ids]:
-                return msg_id
-    return 0
+                return msg_id, f"-100{channel_id}"
+    return 0, 0
 
 def get_readable_time(seconds: int) -> str:
     count = 0
@@ -119,5 +120,3 @@ def get_readable_time(seconds: int) -> str:
 
 subscribed1 = filters.create(is_subscribed1)
 subscribed2 = filters.create(is_subscribed2)
-
-

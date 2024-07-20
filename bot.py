@@ -21,7 +21,7 @@ name ="""
 ╚═╝░░╚═╝╚═╝░░╚══╝╚═╝╚═╝░░░░░╚═╝╚══════╝  ╚═╝░░╚═╝░░░╚═╝░░░╚══════╝
 """
 
-
+CHANNEL_IDS = [-1002225858852, -1002210335718]
 class Bot(Client):
     def __init__(self):
         super().__init__(
@@ -65,7 +65,6 @@ class Bot(Client):
                 self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/Animetalks0 for support")
                 sys.exit()
                 
-CHANNEL_IDS = [-1002225858852, -1002210335718]
 
             try:
                 db_channels = []

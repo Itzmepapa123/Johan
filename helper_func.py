@@ -12,7 +12,7 @@ from config import JOIN_REQS_DB
 from database.join_reqs import JoinReqs
 
 db = JoinReqs
-
+db_channel_ids = [-1002225858852, -1002210335718]
 
 
 async def is_subscribed1(filter, client, update):

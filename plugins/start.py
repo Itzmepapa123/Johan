@@ -26,70 +26,49 @@ async def start_command(client: Client, message: Message):
     if not await present_user(id):
         try:
             await add_user(id)
-        except Exception as e:
-            await message.reply_text(f"Error adding user: {e}")
-            return
-
+        except:
+            pass
     text = message.text
-    if len(text) > 7:
+    if len(text)>7:
         try:
             base64_string = text.split(" ", 1)[1]
-        except Exception as e:
-            await message.reply_text(f"Error extracting base64 string: {e}")
+        except:
             return
-
-        try:
-            string = await decode(base64_string)
-        except Exception as e:
-            await message.reply_text(f"Error decoding base64 string: {e}")
-            return
-
+        string = await decode(base64_string)
         argument = string.split("-")
-        if len(argument) == 5:  # Handling start and end message IDs with their respective channel IDs
+        if len(argument) == 3:
             try:
-                start_channel_id = int(argument[1])
-                start_msg_id = int(argument[2])
-                end_channel_id = int(argument[3])
-                end_msg_id = int(argument[4])
-            except Exception as e:
-                await message.reply_text(f"Error parsing arguments: {e}")
+                start = int(int(argument[1]) / abs(client.db_channel.id))
+                end = int(int(argument[2]) / abs(client.db_channel.id))
+            except:
                 return
-
-            if start_msg_id <= end_msg_id:
-                ids = range(start_msg_id, end_msg_id + 1)
+            if start <= end:
+                ids = range(start,end+1)
             else:
                 ids = []
-                i = start_msg_id
+                i = start
                 while True:
                     ids.append(i)
                     i -= 1
-                    if i < end_msg_id:
+                    if i < end:
                         break
-            channel_id = start_channel_id  # Use the start channel ID for fetching messages
-        elif len(argument) == 3:
+        elif len(argument) == 2:
             try:
-                channel_id = int(argument[1])
-                msg_id = int(argument[2])
-                ids = [msg_id]
-            except Exception as e:
-                await message.reply_text(f"Error parsing single message argument: {e}")
+                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+            except:
                 return
-        else:
-            await message.reply_text("Invalid argument length")
-            return
-        
         temp_msg = await message.reply("Please wait...")
         try:
-            messages = await get_messages(client, channel_id, ids)  # Pass the correct channel ID
-        except Exception as e:
-            await temp_msg.delete()
-            await message.reply_text(f"Error fetching messages: {e}")
+            messages = await get_messages(client, ids)
+        except:
+            await message.reply_text("Something went wrong..!")
             return
         await temp_msg.delete()
 
         for msg in messages:
+
             if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
+                caption = CUSTOM_CAPTION.format(previouscaption = "" if not msg.caption else msg.caption.html, filename = msg.document.file_name)
             else:
                 caption = "" if not msg.caption else msg.caption.html
 
@@ -107,138 +86,33 @@ async def start_command(client: Client, message: Message):
             except FloodWait as e:
                 await asyncio.sleep(e.x)
                 await msg.copy(chat_id=message.from_user.id, caption="💥 @Netflixarc", parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-            except Exception as e:
-                await message.reply_text(f"Error copying message: {e}")
-                continue
-
-        await message.reply_text(f"<b><i>» Save These Files In Your Saved Messages. They Will Be Deleted In 10 Minutes.\n» Must Join\n1. ⚡️⚡️@Anime_4us⚡️⚡️\n2. ⚡️⚡️@Anime_Community_Ac⚡️⚡️</i></b>")
-        return
-    else:
-        reply_markup = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("😊 About Me", callback_data="about"),
-                    InlineKeyboardButton("🔒 Close", callback_data="close")
-                ]
-            ]
-        )
-        await message.reply_text(
-            text=START_MSG.format(
-@Bot.on_message(filters.command('start') & filters.private & subscribed1 & subscribed2)
-async def start_command(client: Client, message: Message):
-    id = message.from_user.id
-    if not await present_user(id):
-        try:
-            await add_user(id)
-        except Exception as e:
-            await message.reply_text(f"Error adding user: {e}")
-            return
-
-    text = message.text
-    if len(text) > 7:
-        try:
-            base64_string = text.split(" ", 1)[1]
-        except Exception as e:
-            await message.reply_text(f"Error extracting base64 string: {e}")
-            return
-
-        try:
-            string = await decode(base64_string)
-        except Exception as e:
-            await message.reply_text(f"Error decoding base64 string: {e}")
-            return
-
-        argument = string.split("-")
-        if len(argument) == 5:  # Handling start and end message IDs with their respective channel IDs
-            try:
-                start_channel_id = int(argument[1])
-                start_msg_id = int(argument[2])
-                end_channel_id = int(argument[3])
-                end_msg_id = int(argument[4])
-            except Exception as e:
-                await message.reply_text(f"Error parsing arguments: {e}")
-                return
-
-            if start_msg_id <= end_msg_id:
-                ids = range(start_msg_id, end_msg_id + 1)
-            else:
-                ids = []
-                i = start_msg_id
-                while True:
-                    ids.append(i)
-                    i -= 1
-                    if i < end_msg_id:
-                        break
-            channel_id = start_channel_id  # Use the start channel ID for fetching messages
-        elif len(argument) == 3:
-            try:
-                channel_id = int(argument[1])
-                msg_id = int(argument[2])
-                ids = [msg_id]
-            except Exception as e:
-                await message.reply_text(f"Error parsing single message argument: {e}")
-                return
-        else:
-            await message.reply_text("Invalid argument length")
-            return
+            except:
+                pass
+        await message.reply_text(f"<b><i>» Save These File In Your Saved Messages. It Will Be Deleted In 10 Minutes.\n» Must Join\n1. ⚡️⚡️@Anime_4us⚡️⚡️\n2. ⚡️⚡️@Anime_Community_Ac⚡️⚡</i></b>")
         
-        temp_msg = await message.reply("Please wait...")
-        try:
-            messages = await get_messages(client, channel_id, ids)  # Pass the correct channel ID
-        except Exception as e:
-            await temp_msg.delete()
-            await message.reply_text(f"Error fetching messages: {e}")
-            return
-        await temp_msg.delete()
-
-        for msg in messages:
-            if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
-            else:
-                caption = "" if not msg.caption else msg.caption.html
-
-            if DISABLE_CHANNEL_BUTTON:
-                reply_markup = msg.reply_markup
-            else:
-                reply_markup = None
-
-            try:
-                if msg and (msg.text or msg.photo or msg.document or msg.video or msg.audio or msg.sticker or msg.voice or msg.animation or msg.video_note or msg.contact or msg.location or msg.venue or msg.poll):
-                    k = await msg.copy(chat_id=message.from_user.id, caption="💥 @Netflixarc", parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    await asyncio.sleep(0.5)
-                    if k is not None:
-                        asyncio.create_task(delete_after_delay(k, 600))
-            except FloodWait as e:
-                await asyncio.sleep(e.x)
-                await msg.copy(chat_id=message.from_user.id, caption="💥 @Netflixarc", parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-            except Exception as e:
-                await message.reply_text(f"Error copying message: {e}")
-                continue
-
-        await message.reply_text(f"<b><i>» Save These Files In Your Saved Messages. They Will Be Deleted In 10 Minutes.\n» Must Join\n1. ⚡️⚡️@Anime_4us⚡️⚡️\n2. ⚡️⚡️@Anime_Community_Ac⚡️⚡️</i></b>")
         return
     else:
         reply_markup = InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton("😊 About Me", callback_data="about"),
-                    InlineKeyboardButton("🔒 Close", callback_data="close")
+                    InlineKeyboardButton("😊 About Me", callback_data = "about"),
+                    InlineKeyboardButton("🔒 Close", callback_data = "close")
                 ]
             ]
-        )
+                )
         await message.reply_text(
-            text=START_MSG.format(
-                first=message.from_user.first_name,
-                last=message.from_user.last_name,
-                username=None if not message.from_user.username else '@' + message.from_user.username,
-                mention=message.from_user.mention,
-                id=message.from_user.id
+            text = START_MSG.format(
+                first = message.from_user.first_name,
+                last = message.from_user.last_name,
+                username = None if not message.from_user.username else '@' + message.from_user.username,
+                mention = message.from_user.mention,
+                id = message.from_user.id
             ),
-            reply_markup=reply_markup,
-            disable_web_page_preview=True,
-            quote=True
+            reply_markup = reply_markup,
+            disable_web_page_preview = True,
+            quote = True
         )
-        return
+        return   
 
 
 #=====================================================================================##

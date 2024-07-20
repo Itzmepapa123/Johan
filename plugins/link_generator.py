@@ -18,7 +18,7 @@ async def batch(client: Client, message: Message):
             )
         except:
             return
-        f_msg_id = await get_message_id(client, first_message, [channel.id for channel in client.db_channels])
+        f_msg_id, f_channel_id = await get_message_id(client, first_message, [channel.id for channel in client.db_channels])
         if f_msg_id:
             break
         else:
@@ -35,14 +35,14 @@ async def batch(client: Client, message: Message):
             )
         except:
             return
-        s_msg_id = await get_message_id(client, second_message, [channel.id for channel in client.db_channels])
+        s_msg_id, s_channel_id = await get_message_id(client, second_message, [channel.id for channel in client.db_channels])
         if s_msg_id:
             break
         else:
             await second_message.reply("❌ Error\n\nthis Forwarded Post is not from my DB Channel or this Link is taken from DB Channel", quote=True)
             continue
 
-    string = f"get-{f_msg_id}-{s_msg_id}"
+    string = f"get-{f_channel_id}-{f_msg_id}-{s_channel_id}-{s_msg_id}"
     base64_string = await encode(string)
     link = f"https://t.me/{client.username}?start={base64_string}"
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={link}')]])
@@ -61,14 +61,14 @@ async def link_generator(client: Client, message: Message):
             )
         except:
             return
-        msg_id = await get_message_id(client, channel_message, [channel.id for channel in client.db_channels])
+        msg_id, channel_id = await get_message_id(client, channel_message, [channel.id for channel in client.db_channels])
         if msg_id:
             break
         else:
             await channel_message.reply("❌ Error\n\nthis Forwarded Post is not from my DB Channel or this Link is not taken from DB Channel", quote=True)
             continue
 
-    base64_string = await encode(f"get-{msg_id}")
+    base64_string = await encode(f"get-{channel_id}-{msg_id}")
     link = f"https://t.me/{client.username}?start={base64_string}"
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={link}')]])
     await channel_message.reply_text(f"<b>Here is your link</b>\n\n{link}", quote=True, reply_markup=reply_markup)

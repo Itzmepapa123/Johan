@@ -64,18 +64,25 @@ class Bot(Client):
                 self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL2}")
                 self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/Animetalks0 for support")
                 sys.exit()
-        try:
-            
-            db_channel = await self.get_chat(-1002210335718)
-            db_channel.append(-1002225858852)
-            self.db_channel = db_channel
-            test = await self.send_message(chat_id = db_channel.id, text = "Test Message")
-            await test.delete()
-        except Exception as e:
-            self.LOGGER(__name__).warning(e)
-            self.LOGGER(__name__).warning(f"Make Sure bot is Admin in DB Channel, and Double check the CHANNEL_ID Value, Current Value {CHANNEL_ID}")
-            self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/Animetalks0 for support")
-            sys.exit()
+                
+CHANNEL_IDS = [-1002225858852, -1002210335718]
+
+            try:
+                db_channels = []
+                for channel_id in CHANNEL_IDS:
+                    db_channel = await self.get_chat(channel_id)
+                    db_channels.append(db_channel)
+                    test = await self.send_message(chat_id=db_channel.id, text="Test Message")
+                    await test.delete()
+ 
+                self.db_channels = db_channels 
+                
+            except Exception as e:
+                self.LOGGER(__name__).warning(e)
+                self.LOGGER(__name__).warning(f"Make sure the bot is an admin in all DB Channels and double-check the CHANNEL_ID values: {CHANNEL_IDS}")
+                self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/Animetalks0 for support")
+                sys.exit()# Store the list of db_channels
+
 
         self.set_parse_mode(ParseMode.HTML)
         self.LOGGER(__name__).info(f"Bot Running..!\n\nCreated by \nhttps://t.me/Animes_Xyz")

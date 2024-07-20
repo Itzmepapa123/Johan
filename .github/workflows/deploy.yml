@@ -24,11 +24,14 @@ jobs:
         VPS_USER: ${{ secrets.VPS_USER }}
       run: |
         ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP << 'EOF'
+        rm -rf Johan
+        git clone https://github.com/Itzmepapa123/Johan.git
         cd Johan
         git fetch origin
         git checkout Netflix
-        git pull origin Netflix 
+        git pull origin Netflix
         docker stop nett || true
         docker rm nett || true
+        docker build -t nett .
         docker run -d --name nett -p 1212:1212 nett
         EOF

@@ -1,15 +1,17 @@
+#(©)AnimeXyz
+
 import base64
 import re
 import asyncio
-from pyrogram import Client, filters
+from pyrogram import filters
 from pyrogram.enums import ChatMemberStatus
+from config import FORCE_SUB_CHANNEL, FORCE_SUB_CHANNEL2, ADMINS
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from pyrogram.errors import FloodWait
-from config import FORCE_SUB_CHANNEL, FORCE_SUB_CHANNEL2, ADMINS, JOIN_REQS_DB
+from config import JOIN_REQS_DB
 from database.join_reqs import JoinReqs
 
 db = JoinReqs
-db_channel_ids = [-1002225858852, -1002210335718]  # Replace with your actual private channel IDs
 
 async def is_subscribed1(filter, client, update):
     if not FORCE_SUB_CHANNEL:
@@ -18,12 +20,14 @@ async def is_subscribed1(filter, client, update):
     if user_id in ADMINS:
         return True
     try:
-        member = await client.get_chat_member(chat_id=FORCE_SUB_CHANNEL, user_id=user_id)
+        member = await client.get_chat_member(chat_id = FORCE_SUB_CHANNEL, user_id = user_id)
     except UserNotParticipant:
         return False
-    if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
+
+    if not member.status in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
         return False
-    return True
+    else:
+        return True
 
 async def is_subscribed2(filter, client, update):
     if not FORCE_SUB_CHANNEL2:
@@ -35,67 +39,76 @@ async def is_subscribed2(filter, client, update):
     if user and user["user_id"] == update.from_user.id:
         return True
     try:
-        member = await client.get_chat_member(chat_id=FORCE_SUB_CHANNEL2, user_id=user_id)
+        member = await client.get_chat_member(chat_id = FORCE_SUB_CHANNEL2, user_id = user_id)
     except UserNotParticipant:
         return False
-    if member.status not in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
-        return False
-    return True
 
+    if not member.status in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER]:
+        return False
+    else:
+        return True
+
+
+        
 async def encode(string):
     string_bytes = string.encode("ascii")
     base64_bytes = base64.urlsafe_b64encode(string_bytes)
-    base64_string = base64_bytes.decode("ascii").strip("=")
+    base64_string = (base64_bytes.decode("ascii")).strip("=")
     return base64_string
 
 async def decode(base64_string):
-    base64_string = base64_string.strip("=")
+    base64_string = base64_string.strip("=") # links generated before this commit will be having = sign, hence striping them to handle padding errors.
     base64_bytes = (base64_string + "=" * (-len(base64_string) % 4)).encode("ascii")
-    string_bytes = base64.urlsafe_b64decode(base64_bytes)
-    return string_bytes.decode("ascii")
+    string_bytes = base64.urlsafe_b64decode(base64_bytes) 
+    string = string_bytes.decode("ascii")
+    return string
 
-async def get_messages(client, db_channel_id, message_ids):
+async def get_messages(client, message_ids):
     messages = []
     total_messages = 0
     while total_messages != len(message_ids):
-        temp_ids = message_ids[total_messages:total_messages+200]
+        temb_ids = message_ids[total_messages:total_messages+200]
         try:
             msgs = await client.get_messages(
-                chat_id=db_channel_id,
-                message_ids=temp_ids
+                chat_id=client.db_channel.id,
+                message_ids=temb_ids
             )
         except FloodWait as e:
             await asyncio.sleep(e.x)
             msgs = await client.get_messages(
-                chat_id=db_channel_id,
-                message_ids=temp_ids
+                chat_id=client.db_channel.id,
+                message_ids=temb_ids
             )
-        except Exception as e:
-            print(f"Error fetching messages: {e}")
-            break
-        total_messages += len(temp_ids)
+        except:
+            pass
+        total_messages += len(temb_ids)
         messages.extend(msgs)
     return messages
 
-async def get_message_id(client, message, db_channel_ids):
+async def get_message_id(client, message):
     if message.forward_from_chat:
-        if message.forward_from_chat.id in db_channel_ids:
-            return message.forward_from_message_id, message.forward_from_chat.id
+        if message.forward_from_chat.id == client.db_channel.id:
+            return message.forward_from_message_id
         else:
-            return 0, 0
+            return 0
     elif message.forward_sender_name:
-        return 0, 0
+        return 0
     elif message.text:
-        pattern = r"https://t.me/c/(\d+)/(\d+)"
-        matches = re.match(pattern, message.text)
+        pattern = "https://t.me/(?:c/)?(.*)/(\d+)"
+        matches = re.match(pattern,message.text)
         if not matches:
-            return 0, 0
+            return 0
         channel_id = matches.group(1)
         msg_id = int(matches.group(2))
         if channel_id.isdigit():
-            if f"-100{channel_id}" in [str(id) for id in db_channel_ids]:
-                return msg_id, f"-100{channel_id}"
-    return 0, 0
+            if f"-100{channel_id}" == str(client.db_channel.id):
+                return msg_id
+        else:
+            if channel_id == client.db_channel.username:
+                return msg_id
+    else:
+        return 0
+
 
 def get_readable_time(seconds: int) -> str:
     count = 0
@@ -118,5 +131,7 @@ def get_readable_time(seconds: int) -> str:
     up_time += ":".join(time_list)
     return up_time
 
+
 subscribed1 = filters.create(is_subscribed1)
 subscribed2 = filters.create(is_subscribed2)
+       

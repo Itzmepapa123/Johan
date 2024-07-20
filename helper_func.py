@@ -120,21 +120,4 @@ def get_readable_time(seconds: int) -> str:
 subscribed1 = filters.create(is_subscribed1)
 subscribed2 = filters.create(is_subscribed2)
 
-# Example handler function in your Pyrogram bot
-async def batch(client, message):
-    f_msg_id = await get_message_id(client, message, db_channel_ids)
-    print(f"Extracted message ID: {f_msg_id}")
 
-    if f_msg_id:
-        messages = await get_messages(client, db_channel_ids[0], [f_msg_id])
-        for msg in messages:
-            print(f"Message: {msg}")
-
-# Register the handler in your Pyrogram dispatcher
-app = Client("my_bot")
-
-@app.on_message(filters.text & subscribed1 & subscribed2)
-async def my_handler(client, message):
-    await batch(client, message)
-
-app.run()

@@ -29,37 +29,42 @@ async def start_command(client: Client, message: Message):
         except:
             pass
     text = message.text
-    if len(text)>7:
+    if len(text) > 7:
         try:
             base64_string = text.split(" ", 1)[1]
         except:
             return
         string = await decode(base64_string)
         argument = string.split("-")
-        if len(argument) == 3:
+        if len(argument) == 4:  # Handling start and end message IDs with their respective channel IDs
             try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
+                start_channel_id = int(argument[1])
+                start_msg_id = int(argument[2])
+                end_channel_id = int(argument[3])
+                end_msg_id = int(argument[4])
             except:
                 return
-            if start <= end:
-                ids = range(start,end+1)
+            if start_msg_id <= end_msg_id:
+                ids = range(start_msg_id, end_msg_id + 1)
             else:
                 ids = []
-                i = start
+                i = start_msg_id
                 while True:
                     ids.append(i)
                     i -= 1
-                    if i < end:
+                    if i < end_msg_id:
                         break
+            channel_id = start_channel_id  # Use the start channel ID for fetching messages
         elif len(argument) == 2:
             try:
-                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+                channel_id = int(argument[1])
+                msg_id = int(argument[2])
+                ids = [msg_id]
             except:
                 return
         temp_msg = await message.reply("Please wait...")
         try:
-            messages = await get_messages(client, ids)
+            messages = await get_messages(client, channel_id, ids)  # Pass the correct channel ID
         except:
             await message.reply_text("Something went wrong..!")
             return
@@ -68,7 +73,7 @@ async def start_command(client: Client, message: Message):
         for msg in messages:
 
             if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption = "" if not msg.caption else msg.caption.html, filename = msg.document.file_name)
+                caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
             else:
                 caption = "" if not msg.caption else msg.caption.html
 
@@ -95,24 +100,24 @@ async def start_command(client: Client, message: Message):
         reply_markup = InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton("😊 About Me", callback_data = "about"),
-                    InlineKeyboardButton("🔒 Close", callback_data = "close")
+                    InlineKeyboardButton("😊 About Me", callback_data="about"),
+                    InlineKeyboardButton("🔒 Close", callback_data="close")
                 ]
             ]
-                )
-        await message.reply_text(
-            text = START_MSG.format(
-                first = message.from_user.first_name,
-                last = message.from_user.last_name,
-                username = None if not message.from_user.username else '@' + message.from_user.username,
-                mention = message.from_user.mention,
-                id = message.from_user.id
-            ),
-            reply_markup = reply_markup,
-            disable_web_page_preview = True,
-            quote = True
         )
-        return   
+        await message.reply_text(
+            text=START_MSG.format(
+                first=message.from_user.first_name,
+                last=message.from_user.last_name,
+                username=None if not message.from_user.username else '@' + message.from_user.username,
+                mention=message.from_user.mention,
+                id=message.from_user.id
+            ),
+            reply_markup=reply_markup,
+            disable_web_page_preview=True,
+            quote=True
+        )
+        return
 
 
 #=====================================================================================##

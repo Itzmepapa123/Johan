@@ -27,26 +27,34 @@ async def start_command(client: Client, message: Message):
         try:
             await add_user(id)
         except Exception as e:
-            print(f"Error adding user: {e}")
-            pass
+            await message.reply_text(f"Error adding user: {e}")
+            return
+
     text = message.text
     if len(text) > 7:
         try:
             base64_string = text.split(" ", 1)[1]
         except Exception as e:
-            print(f"Error extracting base64 string: {e}")
+            await message.reply_text(f"Error extracting base64 string: {e}")
             return
-        string = await decode(base64_string)
+
+        try:
+            string = await decode(base64_string)
+        except Exception as e:
+            await message.reply_text(f"Error decoding base64 string: {e}")
+            return
+
         argument = string.split("-")
-        if len(argument) == 4:  # Handling start and end message IDs with their respective channel IDs
+        if len(argument) == 5:  # Handling start and end message IDs with their respective channel IDs
             try:
                 start_channel_id = int(argument[1])
                 start_msg_id = int(argument[2])
                 end_channel_id = int(argument[3])
                 end_msg_id = int(argument[4])
             except Exception as e:
-                print(f"Error parsing arguments: {e}")
+                await message.reply_text(f"Error parsing arguments: {e}")
                 return
+
             if start_msg_id <= end_msg_id:
                 ids = range(start_msg_id, end_msg_id + 1)
             else:
@@ -58,24 +66,24 @@ async def start_command(client: Client, message: Message):
                     if i < end_msg_id:
                         break
             channel_id = start_channel_id  # Use the start channel ID for fetching messages
-        elif len(argument) == 2:
+        elif len(argument) == 3:
             try:
                 channel_id = int(argument[1])
                 msg_id = int(argument[2])
                 ids = [msg_id]
             except Exception as e:
-                print(f"Error parsing single message argument: {e}")
+                await message.reply_text(f"Error parsing single message argument: {e}")
                 return
         else:
-            print("Invalid argument length")
+            await message.reply_text("Invalid argument length")
             return
         
         temp_msg = await message.reply("Please wait...")
         try:
             messages = await get_messages(client, channel_id, ids)  # Pass the correct channel ID
         except Exception as e:
-            print(f"Error fetching messages: {e}")
-            await message.reply_text("Something went wrong..!")
+            await temp_msg.delete()
+            await message.reply_text(f"Error fetching messages: {e}")
             return
         await temp_msg.delete()
 
@@ -100,10 +108,10 @@ async def start_command(client: Client, message: Message):
                 await asyncio.sleep(e.x)
                 await msg.copy(chat_id=message.from_user.id, caption="💥 @Netflixarc", parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
             except Exception as e:
-                print(f"Error copying message: {e}")
-                pass
+                await message.reply_text(f"Error copying message: {e}")
+                continue
+
         await message.reply_text(f"<b><i>» Save These Files In Your Saved Messages. They Will Be Deleted In 10 Minutes.\n» Must Join\n1. ⚡️⚡️@Anime_4us⚡️⚡️\n2. ⚡️⚡️@Anime_Community_Ac⚡️⚡️</i></b>")
-        
         return
     else:
         reply_markup = InlineKeyboardMarkup(

@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL, FORCE_SUB_CHANNEL2, CHANNEL_ID, PORT
-
+abab = -1002225858852
 
 name ="""
 ░█████╗░███╗░░██╗██╗███╗░░░███╗███████╗  ██╗░░██╗██╗░░░██╗███████╗
@@ -65,7 +65,7 @@ class Bot(Client):
                 self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/Animetalks0 for support")
                 sys.exit()
         try:
-            db_channel = await self.get_chat(-1002225858852)
+            db_channel = await self.get_chat(abab)
             self.db_channel = db_channel
             test = await self.send_message(chat_id = db_channel.id, text = "Test Message")
             await test.delete()
@@ -74,8 +74,6 @@ class Bot(Client):
             self.LOGGER(__name__).warning(f"Make Sure bot is Admin in DB Channel, and Double check the CHANNEL_ID Value, Current Value {CHANNEL_ID}")
             self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/Animetalks0 for support")
             sys.exit()
-
-        
 
         self.set_parse_mode(ParseMode.HTML)
         self.LOGGER(__name__).info(f"Bot Running..!\n\nCreated by \nhttps://t.me/Animes_Xyz")
